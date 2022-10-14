@@ -23,4 +23,5 @@ public class Constants {
     public static final String NONCE = "nonce";
     public static final String CODE = "code";
     public static final String CLIENT_TOKEN = "CLIENT_TOKEN";
+    public static final String AUTHORIZATION = "Authorization";
 }
