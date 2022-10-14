@@ -44,7 +44,6 @@ public class AppProperties {
 
     //urls
     private String stitchClientTokenUrl;
-    private String redirectUrlHost;
 
     //instantPay
     private String instantPayGraphqlUrl;
@@ -53,6 +52,8 @@ public class AppProperties {
 
     //linkPay
     private String linkPayRedirectUrl;
+    private String linkPayUpdatesRedirectUrl;
+    private String linkPayMultifactorRedirectUrl;
 
     private int cacheTime = 20;
 
