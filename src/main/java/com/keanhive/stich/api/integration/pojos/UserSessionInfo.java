@@ -1,5 +1,6 @@
 package com.keanhive.stich.api.integration.pojos;
 
+import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import lombok.Data;
 
 /**
@@ -16,4 +17,5 @@ public class UserSessionInfo {
     private String accessToken;
     private String refreshToken;
     private String scope;
+    private LinkPaymentRequestPojo linkPaymentRequest;
 }

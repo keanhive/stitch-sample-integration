@@ -1,14 +1,15 @@
 package com.keanhive.stich.api.integration.controller;
 
+import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import com.keanhive.stich.api.integration.service.InstantPayService;
 import com.keanhive.stich.api.integration.service.LinkPayService;
+import com.keanhive.stich.api.integration.service.TokenGenerationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @Slf4j
@@ -20,17 +21,33 @@ public class LinkPayController {
     InstantPayService instantPayService;
 
     @Autowired
+    TokenGenerationService tokenGenerationService;
+
+    @Autowired
     LinkPayService linkPayService;
 
     @GetMapping("")
-    public void linkPay(@RequestParam(required = false) Map<String, String> qparams) {
-        linkPayService.handleStep1(qparams);
+    public void linkPay(@Valid @RequestBody LinkPaymentRequestPojo linkPaymentRequestPojo) {
+        linkPayService.handleStep1(linkPaymentRequestPojo);
     }
 
+    @GetMapping("/update")
+    public ModelAndView greeting(@RequestParam(name="update", required=false) String update) {
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("update.html");
+        modelAndView.addObject("update", update);
+        return modelAndView;
+    }
 
     @GetMapping("/multifactor")
-    public void linkPayMultifactor(@RequestParam(required = false) Map<String, String> qparams) {
-        linkPayService.linkPayMultifactor(qparams);
+    public ModelAndView linkPayMultifactor(@RequestParam(required = false) Map<String, String> qparams) {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("multifactor.html");
+
+        linkPayService.linkPayMultifactor(qparams, modelAndView);
+
+        return modelAndView;
     }
 
     @GetMapping("/cancel")
@@ -41,6 +58,11 @@ public class LinkPayController {
     @GetMapping("/status")
     public String linkPayGetStatus(@RequestParam(required = false) Map<String, String> qparams) {
         return linkPayService.getStatus(qparams);
+    }
+
+    @GetMapping("/retrieve-token")
+    public void retrieveToken(@RequestParam(required = false) Map<String, String> qparams) {
+        tokenGenerationService.retrieveToken(qparams);
     }
 
     @GetMapping("/status/all")

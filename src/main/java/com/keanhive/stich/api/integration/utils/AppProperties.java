@@ -54,6 +54,7 @@ public class AppProperties {
     private String linkPayRedirectUrl;
     private String linkPayUpdatesRedirectUrl;
     private String linkPayMultifactorRedirectUrl;
+    private String linkPayUpdateRedirectUrl;
 
     private int cacheTime = 20;
 
