@@ -13,6 +13,7 @@ import com.keanhive.stich.api.integration.pojos.ClientTokenResponse;
 import com.keanhive.stich.api.integration.pojos.UserTokenResponse;
 import com.keanhive.stich.api.integration.restcall.RestServiceResponse;
 import com.keanhive.stich.api.integration.restcall.SpringClientParams;
+import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import com.keanhive.stich.api.integration.utils.AppProperties;
 import com.keanhive.stich.api.integration.utils.Constants;
 import com.keanhive.stich.api.integration.utils.Util;
@@ -106,10 +107,11 @@ public class TokenGenerationService {
      * Step 1 process of generating user token
      * Prepares a url with the user details and also provides a call back url
      * to be triggered by stitch api when complete.
+     *
      * @param authorizationUrl
-     * @param uniqueId
+     * @param linkPaymentRequestPojo
      */
-    public void handleUserTokenStep1(String authorizationUrl, String uniqueId) {
+    public void handleUserTokenStep1(String authorizationUrl, LinkPaymentRequestPojo linkPaymentRequestPojo) {
         Map<String, String> verifierChallengePair = util.generateVerifierChallengePair();
 
         UserSessionInfo userSessionInfo = new UserSessionInfo();
@@ -117,6 +119,7 @@ public class TokenGenerationService {
         userSessionInfo.setVerifier(verifierChallengePair.get(Constants.VERIFIER));
         userSessionInfo.setState(util.generateRandomStateOrNonce());
         userSessionInfo.setNonce(util.generateRandomStateOrNonce());
+        userSessionInfo.setLinkPaymentRequest(linkPaymentRequestPojo);
 
         StringBuilder generatedUrl = new StringBuilder();
         generatedUrl
@@ -134,7 +137,7 @@ public class TokenGenerationService {
 
 
         cacheUserSessionInfo(userSessionInfo);
-        cacheService.setItem(uniqueId, userSessionInfo.getState(), appProperties.getCacheTime());
+        cacheService.setItem(linkPaymentRequestPojo.getUniqueId(), userSessionInfo.getState(), appProperties.getCacheTime());
         util.launchUrlInBrowser(generatedUrl.toString());
     }
 
