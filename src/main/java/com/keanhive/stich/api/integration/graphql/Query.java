@@ -1,5 +1,6 @@
 package com.keanhive.stich.api.integration.graphql;
 
+import com.keanhive.stich.api.integration.restcall.request.InstantPaymentRequestPojo;
 import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 
 import java.util.HashMap;
@@ -392,19 +393,19 @@ public class Query {
     }
 
 
-    public static Map<String, Object> getCreatePaymentVariables() {
+    public static Map<String, Object> getCreatePaymentVariables(InstantPaymentRequestPojo paymentRequest) {
         Map<String, Object> amount = new HashMap<>();
-        amount.put("quantity", 2);
-        amount.put("currency", "ZAR");
+        amount.put("quantity", paymentRequest.getAmount().getQuantity());
+        amount.put("currency", paymentRequest.getAmount().currency);
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("amount", amount);
-        variables.put("beneficiaryAccountNumber", "123456789");
-        variables.put("beneficiaryBankId", "fnb");
-        variables.put("beneficiaryName", "FizzBuzz Co.");
-        variables.put("beneficiaryReference", "Joe-Fizz-01");
-        variables.put("externalReference", "example-e32e5478-325b-4869-a53e-2021727d2afe");
-        variables.put("payerReference", "KombuchaFizz");
+        variables.put("payerReference", paymentRequest.getPayerReference());
+        variables.put("beneficiaryReference", paymentRequest.getBeneficiaryReference());
+        variables.put("externalReference", paymentRequest.getExternalReference());
+        variables.put("beneficiaryAccountNumber", paymentRequest.getBeneficiary().getBankAccount().getAccountNumber());
+        variables.put("beneficiaryBankId", paymentRequest.getBeneficiary().getBankAccount().getBankId());
+        variables.put("beneficiaryName", paymentRequest.getBeneficiary().getBankAccount().getName());
 
         return variables;
     }
