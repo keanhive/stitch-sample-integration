@@ -10,9 +10,10 @@ import com.keanhive.stich.api.integration.graphql.response.ClientPaymentAuthoriz
 import com.keanhive.stich.api.integration.graphql.response.GetLinkedAccountAndIdentityInfoDto;
 import com.keanhive.stich.api.integration.graphql.response.InitiatePaymentDto;
 import com.keanhive.stich.api.integration.graphql.response.InitiatePaymentErrorDto;
-import com.keanhive.stich.api.integration.pojos.UserSessionInfo;
 import com.keanhive.stich.api.integration.pojos.ClientTokenResponse;
+import com.keanhive.stich.api.integration.pojos.UserSessionInfo;
 import com.keanhive.stich.api.integration.restcall.SpringGraphQlClientParams;
+import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import com.keanhive.stich.api.integration.utils.AppProperties;
 import com.keanhive.stich.api.integration.utils.Constants;
 import com.keanhive.stich.api.integration.utils.Util;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,10 +64,16 @@ public class LinkPayService {
 
     /**
      * displays the response gotten from when link pay requires multifactor verification
+     *
      * @param qparams
+     * @param model
      */
-    public void linkPayMultifactor(Map<String, String> qparams) {
+    public void linkPayMultifactor(Map<String, String> qparams, ModelAndView model) {
         log.debug("linkPayMultifactor qparams {}", qparams);
+
+        model.addObject("id", qparams.get("id"));
+        model.addObject("externalReference", qparams.get("externalReference"));
+        model.addObject("status", qparams.get("status"));
     }
 
     /**
@@ -75,20 +83,15 @@ public class LinkPayService {
      * CreateAccountLinkingRequest
      * Retrieve user tokens
      *
-     * @param qparams
      * qparams holds uid used to uniquely Identify a transaction made
      */
-    public void handleStep1(Map<String, String> qparams) {
-        String uniqueId = qparams.get("uid");
-
-        if (StringUtils.isBlank(uniqueId)) {
-            throw new IllegalArgumentException("Please ensure you set uid");
-        }
-
+    public void handleStep1(LinkPaymentRequestPojo linkPaymentRequestPojo) {
         ClientTokenResponse clientTokenResponse = tokenGenerationService.handleClientTokenSession();
         log.debug("clientTokednResponse: {} ======= : {}", clientTokenResponse, clientTokenResponse.getAccessToken());
-        ClientPaymentAuthorizationDto clientPaymentAuthorizationDto = initiateCreateAccountLinkingRequest(clientTokenResponse);
-        tokenGenerationService.handleUserTokenStep1(clientPaymentAuthorizationDto.getData().getClientPaymentAuthorizationRequestCreate().getAuthorizationRequestUrl(), uniqueId);
+        ClientPaymentAuthorizationDto clientPaymentAuthorizationDto = initiateCreateAccountLinkingRequest(clientTokenResponse, linkPaymentRequestPojo);
+        tokenGenerationService
+                .handleUserTokenStep1(clientPaymentAuthorizationDto.getData().getClientPaymentAuthorizationRequestCreate().getAuthorizationRequestUrl()
+                        , linkPaymentRequestPojo);
     }
 
     /**
@@ -118,7 +121,7 @@ public class LinkPayService {
 
         SpringGraphQlClientParams<InitiatePaymentDto> params = new SpringGraphQlClientParams<>();
         params.setQuery(Query.getUserInitiatePaymentQuery());
-        params.setVariables(Query.getUserInitiatePaymentVariables());
+        params.setVariables(Query.getUserInitiatePaymentVariables(userSessionInfo.getLinkPaymentRequest()));
         params.setTarget(appProperties.getInstantPayGraphqlUrl());
         params.setResponseClazz(InitiatePaymentDto.class);
         params.setHeaders(headers);
@@ -153,6 +156,8 @@ public class LinkPayService {
                 case "PAYMENT_FAILED":
                 default:{
                     log.error("Transaction failed with reason: {}", initiatePaymentErrorDto.getErrors().get(0).getExtensions().getReason());
+                    String launchUrl = String.format("%s?update=%s", appProperties.getLinkPayUpdateRedirectUrl(), initiatePaymentErrorDto.getErrors().get(0).getExtensions().getReason());
+                    util.launchUrlInBrowser(launchUrl);
                     break;
                 }
             }
@@ -187,7 +192,7 @@ public class LinkPayService {
 
     }
 
-    private ClientPaymentAuthorizationDto initiateCreateAccountLinkingRequest(ClientTokenResponse clientTokenResponse) {
+    private ClientPaymentAuthorizationDto initiateCreateAccountLinkingRequest(ClientTokenResponse clientTokenResponse, LinkPaymentRequestPojo linkPaymentRequestPojo) {
 
         WebClient webClient = WebClient
                 .builder()
@@ -199,7 +204,7 @@ public class LinkPayService {
         GraphqlRequestBody graphQLRequestBody = new GraphqlRequestBody();
 
         final String query = Query.createAccountLinkingRequestUpdatesQuery();
-        final Map<String, Object> variables = Query.createAccountLinkingRequestUpdatesQueryVariables();
+        final Map<String, Object> variables = Query.createAccountLinkingRequestUpdatesQueryVariables(linkPaymentRequestPojo);
 
         graphQLRequestBody.setQuery(query);
         graphQLRequestBody.setVariables(variables);

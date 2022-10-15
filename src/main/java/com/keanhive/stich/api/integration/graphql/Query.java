@@ -1,5 +1,7 @@
 package com.keanhive.stich.api.integration.graphql;
 
+import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -224,16 +226,16 @@ public class Query {
                 ;
     }
 
-    public static Map<String, Object> getUserInitiatePaymentVariables() {
+    public static Map<String, Object> getUserInitiatePaymentVariables(LinkPaymentRequestPojo paymentRequest) {
         Map<String, Object> amount = new HashMap<>();
-        amount.put("quantity", 2);
-        amount.put("currency", "ZAR");
+        amount.put("quantity", paymentRequest.getAmount().getQuantity());
+        amount.put("currency", paymentRequest.getAmount().currency);
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("amount", amount);
-        variables.put("payerReference", "TestPayer");
-        variables.put("beneficiaryReference", "TestBeneficiary");
-        variables.put("externalReference", "TestPayer");
+        variables.put("payerReference", paymentRequest.getPayerReference());
+        variables.put("beneficiaryReference", paymentRequest.getBeneficiaryReference());
+        variables.put("externalReference", paymentRequest.getExternalReference());
 
         return variables;
     }
@@ -306,18 +308,18 @@ public class Query {
                 "}";
     }
 
-    public static Map<String, Object> createAccountLinkingRequestUpdatesQueryVariables() {
+    public static Map<String, Object> createAccountLinkingRequestUpdatesQueryVariables(LinkPaymentRequestPojo paymentRequest) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("name", "Sample Account");
-        variables.put("bankId", "absa");
-        variables.put("accountNumber", "1234567890");
-        variables.put("accountType", "current");
-        variables.put("beneficiaryType", "private");
-        variables.put("reference", "TestBeneficiary");
-        variables.put("payerEmail", "keanhive@example.com");
-        variables.put("payerName", "KeanHive");
-        variables.put("payerReference", "TestPayer");
-        variables.put("payerPhoneNumber", "27821234567");
+        variables.put("name", paymentRequest.getBeneficiary().getBankAccount().getName());
+        variables.put("bankId", paymentRequest.getBeneficiary().getBankAccount().getBankId());
+        variables.put("accountNumber", paymentRequest.getBeneficiary().getBankAccount().getAccountNumber());
+        variables.put("accountType", paymentRequest.getAccountType());
+        variables.put("beneficiaryType", paymentRequest.getBeneficiaryType());
+        variables.put("reference", paymentRequest.getBeneficiaryReference());
+        variables.put("payerEmail", paymentRequest.getPayerEmail());
+        variables.put("payerName", paymentRequest.getPayerName());
+        variables.put("payerReference", paymentRequest.getPayerReference());
+        variables.put("payerPhoneNumber", paymentRequest.getPayerPhoneNumber());
 
         return variables;
     }
