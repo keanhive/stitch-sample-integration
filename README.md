@@ -38,3 +38,5 @@ Repository that integrates to stitch.money api using Java(Spring)
   }
   
 ```
+
+https://support.stitch.money/hc/en-us/articles/6243415533073-I-m-getting-an-unauthorized-client-error-

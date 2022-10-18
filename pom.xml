@@ -14,7 +14,7 @@
 	<name>stich-api-integration</name>
 	<description>Stitch API integration project for Spring Boot</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>15</java.version>
 		<testcontainers.version>1.17.4</testcontainers.version>
 	</properties>
 	<dependencies>
@@ -115,7 +115,15 @@
 					</excludes>
 				</configuration>
 			</plugin>
-		</plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>15</source>
+                    <target>15</target>
+                </configuration>
+            </plugin>
+        </plugins>
 	</build>
 
 </project>
