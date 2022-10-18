@@ -92,7 +92,6 @@ public class TokenGenerationService {
 
         try {
             clientTokenResponseR = util.post(params, restTemplate);
-            log.debug("clientTokenResponse: {}", clientTokenResponse);
             clientTokenResponse = clientTokenResponseR.getBody();
             cacheClientToken(clientTokenResponse);
             return clientTokenResponse;

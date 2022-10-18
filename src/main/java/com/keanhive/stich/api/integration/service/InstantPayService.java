@@ -39,10 +39,6 @@ public class InstantPayService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final Util util = new Util();
 
-    public void handleWebHook(Map<String, String> qparams) {
-        log.debug("handleWebHook details {}", qparams);
-    }
-
     public void instantPayConclusion(Map<String, String> qparams, ModelAndView modelAndView) {
         log.debug("instant pay details {}", qparams);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy HH:mm:ss a");
@@ -66,7 +62,7 @@ public class InstantPayService {
         GraphqlRequestBody graphQLRequestBody = new GraphqlRequestBody();
 
         final String query = Query.instantPayUpdatesQuery();
-        final Map<String, Object> variables = Query.instantPayUpdatesQueryVariables(appProperties.getInstantPayWebHookUrl());
+        final Map<String, Object> variables = Query.instantPayUpdatesQueryVariables(appProperties.getWebHookRedirectUrl());
 
         graphQLRequestBody.setQuery(query);
         graphQLRequestBody.setVariables(variables);
