@@ -1,10 +1,12 @@
 package com.keanhive.stich.api.integration.controller;
 
+import com.keanhive.stich.api.integration.cache.CacheService;
 import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import com.keanhive.stich.api.integration.service.InstantPayService;
 import com.keanhive.stich.api.integration.service.LinkPayService;
 import com.keanhive.stich.api.integration.service.TokenGenerationService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,24 +28,29 @@ public class LinkPayController {
     @Autowired
     LinkPayService linkPayService;
 
+    @Autowired
+    CacheService cacheService;
+
     @GetMapping("")
     public void linkPay(@Valid @RequestBody LinkPaymentRequestPojo linkPaymentRequestPojo) {
         linkPayService.handleStep1(linkPaymentRequestPojo);
     }
 
     @GetMapping("/update")
-    public ModelAndView greeting(@RequestParam(name="update", required=false) String update) {
+    public ModelAndView greeting(@RequestParam(name="update", required=false) String update,
+                                 @RequestParam(name="cachekey", required=false) String cacheKey) {
 
+//        log.debug("cacheKey data: {}", cacheService.getItem(cacheKey));
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("update.html");
-        modelAndView.addObject("update", update);
+        modelAndView.addObject("update", StringUtils.isNotBlank(cacheKey) ? cacheService.getItem(cacheKey) : update);
         return modelAndView;
     }
 
     @GetMapping("/multifactor")
     public ModelAndView linkPayMultifactor(@RequestParam(required = false) Map<String, String> qparams) {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("multifactor.html");
+        modelAndView.setViewName("result.html");
 
         linkPayService.linkPayMultifactor(qparams, modelAndView);
 

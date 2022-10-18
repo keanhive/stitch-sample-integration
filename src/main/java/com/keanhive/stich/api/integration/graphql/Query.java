@@ -8,6 +8,147 @@ import java.util.Map;
 
 public class Query {
 
+    public static String getDebitOrderPaymentsByBankAccountQuery() {
+        return "query DebitOrderPaymentsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {\n" +
+                "  node(id: $accountId) {\n" +
+                "    ... on BankAccount {\n" +
+                "      debitOrderPayments(first: $first, after: $after) {\n" +
+                "        pageInfo {\n" +
+                "          hasNextPage\n" +
+                "          endCursor\n" +
+                "        }\n" +
+                "        edges {\n" +
+                "          node {\n" +
+                "            id\n" +
+                "            amount\n" +
+                "            reference\n" +
+                "            date\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+    public static String getTransactionsByBankAccountQuery() {
+        return "query TransactionsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {\n" +
+                "  node(id: $accountId) {\n" +
+                "    ... on BankAccount {\n" +
+                "      transactions(first: $first, after: $after) {\n" +
+                "        pageInfo {\n" +
+                "          hasNextPage\n" +
+                "          endCursor\n" +
+                "        }\n" +
+                "        edges {\n" +
+                "          node {\n" +
+                "            id\n" +
+                "            amount\n" +
+                "            reference\n" +
+                "            description\n" +
+                "            date\n" +
+                "            runningBalance\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static Map<String, Object> getTransactionsByBankAccountVariables(String accountId) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("accountId", accountId);
+        variables.put("first", 10);
+        return variables;
+    }
+    public static String getGetAccountBalanceQuery() {
+        return "query GetAccountBalances {\n" +
+                "  user {\n" +
+                "    bankAccounts {\n" +
+                "      currentBalance\n" +
+                "      availableBalance\n" +
+                "      id\n" +
+                "      name\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+    }
+    public static String getGetAccountHoldersQuery() {
+        return "query GetAccountHolders {\n" +
+                "  user {\n" +
+                "    bankAccounts {\n" +
+                "      accountHolder {\n" +
+                "        __typename\n" +
+                "        ... on Individual {\n" +
+                "          gender\n" +
+                "          fullName\n" +
+                "          email\n" +
+                "          familyName\n" +
+                "          givenName\n" +
+                "          identifyingDocument {\n" +
+                "            ... on IdentityDocument {\n" +
+                "              __typename\n" +
+                "              country\n" +
+                "              number\n" +
+                "            }\n" +
+                "            ... on Passport {\n" +
+                "              __typename\n" +
+                "              country\n" +
+                "              number\n" +
+                "            }\n" +
+                "          }\n" +
+                "          middleName\n" +
+                "          nickname\n" +
+                "          homeAddress {\n" +
+                "            country\n" +
+                "            formatted\n" +
+                "            locality\n" +
+                "            postalCode\n" +
+                "            region\n" +
+                "            streetAddress\n" +
+                "          }\n" +
+                "          contact {\n" +
+                "            name\n" +
+                "            phoneNumber\n" +
+                "          }\n" +
+                "        }\n" +
+                "        ... on Business {\n" +
+                "          registrationNumber\n" +
+                "          name\n" +
+                "          accountContact {\n" +
+                "            name\n" +
+                "            phoneNumber\n" +
+                "          }\n" +
+                "          businessAddress {\n" +
+                "            country\n" +
+                "            formatted\n" +
+                "            locality\n" +
+                "            postalCode\n" +
+                "            streetAddress\n" +
+                "            region\n" +
+                "          }\n" +
+                "          email\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+    }
+    public static String getGetAccountsQuery() {
+        return "query GetAccounts {\n" +
+                "  user {\n" +
+                "    bankAccounts {\n" +
+                "      accountNumber\n" +
+                "      accountType\n" +
+                "      bankId\n" +
+                "      branchCode\n" +
+                "      id\n" +
+                "      name\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+    }
+
     public static String getLinkPayUpdatesQuery() {
         return "subscription LinkPayUpdates($webhookUrl: URL!, $headers: [InputHeader!]) {\n" +
                 "  client(webhook: {url: $webhookUrl, headers: $headers}) {\n" +
