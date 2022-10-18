@@ -48,7 +48,9 @@ public class AppProperties {
     //instantPay
     private String instantPayGraphqlUrl;
     private String instantPayRedirectUrl;
-    private String instantPayWebHookUrl;
+
+    //webhook
+    private String webHookRedirectUrl;
 
     //linkPay
     private String linkPayRedirectUrl;

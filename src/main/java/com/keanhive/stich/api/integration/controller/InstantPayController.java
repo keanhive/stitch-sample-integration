@@ -33,11 +33,6 @@ public class InstantPayController {
         return modelAndView;
     }
 
-    @GetMapping("/web-hook")
-    public void webHook(@RequestParam(required = false) Map<String, String> qparams) {
-        instantPayService.handleWebHook(qparams);
-    }
-
     @GetMapping("/subscribe/web-hook")
     public void subscribeWebHook() {
         instantPayService.subscribeToWebHook();

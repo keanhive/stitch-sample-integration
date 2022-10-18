@@ -2,11 +2,129 @@ package com.keanhive.stich.api.integration.graphql;
 
 import com.keanhive.stich.api.integration.restcall.request.InstantPaymentRequestPojo;
 import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
+import com.keanhive.stich.api.integration.restcall.request.RefundRequestPojo;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Query {
+
+    public static String getRefundUpdatesQuery() {
+        return "subscription RefundUpdates($webhookUrl: URL!, $headers: [InputHeader!])  {\n" +
+                "  client(webhook: {url: $webhookUrl, headers: $headers}) {\n" +
+                "    refunds {\n" +
+                "      node {\n" +
+                "        status {\n" +
+                "          ... on RefundSubmitted {\n" +
+                "            __typename\n" +
+                "            date\n" +
+                "          }\n" +
+                "          ... on RefundCompleted {\n" +
+                "            __typename\n" +
+                "            date\n" +
+                "            expectedSettlement\n" +
+                "          }\n" +
+                "          ... on RefundError {\n" +
+                "            __typename\n" +
+                "            date\n" +
+                "            reason\n" +
+                "          }\n" +
+                "        }\n" +
+                "        reason\n" +
+                "        id\n" +
+                "        created\n" +
+                "        amount\n" +
+                "        beneficiaryReference\n" +
+                "      }\n" +
+                "      eventId\n" +
+                "      subscriptionId\n" +
+                "      time\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static Map<String, Object> getRefundUpdatesVariables(String webhookUrl) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("webhookUrl", webhookUrl);
+        return variables;
+    }
+
+    public static String getGetRefundStatusQuery() {
+        return "query GetRefundStatus($refundId: ID!) {\n" +
+                "  node(id: $refundId) {\n" +
+                "    ... on Refund {\n" +
+                "      id\n" +
+                "      status {\n" +
+                "        ... on RefundPending {\n" +
+                "          __typename\n" +
+                "          date\n" +
+                "        }\n" +
+                "        ... on RefundSubmitted {\n" +
+                "          __typename\n" +
+                "          date\n" +
+                "        }\n" +
+                "        ... on RefundCompleted {\n" +
+                "          __typename\n" +
+                "          date\n" +
+                "          expectedSettlement\n" +
+                "        }\n" +
+                "        ... on RefundError {\n" +
+                "          __typename\n" +
+                "          date\n" +
+                "          reason\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static Map<String, Object> getGetRefundStatusVariables(String  refundId) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("refundId", refundId);
+        return variables;
+    }
+
+    public static String getCreateRefundQuery() {
+        return "mutation CreateRefund(\n" +
+                "    $amount: MoneyInput!,\n" +
+                "    $reason: RefundReason!,\n" +
+                "    $nonce: String!,\n" +
+                "    $beneficiaryReference: String!,\n" +
+                "    $paymentRequestId: ID!\n" +
+                ") {\n" +
+                "  clientRefundInitiate(input: {\n" +
+                "      amount: $amount,\n" +
+                "      reason: $reason,\n" +
+                "      nonce: $nonce,\n" +
+                "      beneficiaryReference: $beneficiaryReference,\n" +
+                "      paymentRequestId: $paymentRequestId\n" +
+                "    }) {\n" +
+                "    refund {\n" +
+                "      id\n" +
+                "      paymentInitiationRequest {\n" +
+                "        id\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static Map<String, Object> getCreateRefundVariables(RefundRequestPojo paymentRequest, String nonce) {
+        Map<String, Object> amount = new HashMap<>();
+        amount.put("quantity", paymentRequest.getAmount().getQuantity());
+        amount.put("currency", paymentRequest.getAmount().getCurrency());
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("amount", amount);
+        variables.put("reason", paymentRequest.getReason());
+        variables.put("nonce", nonce);
+        variables.put("beneficiaryReference", paymentRequest.getBeneficiaryReference());
+        variables.put("paymentRequestId", paymentRequest.getPaymentRequestId());
+
+        return variables;
+    }
 
     public static String getDebitOrderPaymentsByBankAccountQuery() {
         return "query DebitOrderPaymentsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {\n" +
@@ -371,7 +489,7 @@ public class Query {
     public static Map<String, Object> getUserInitiatePaymentVariables(LinkPaymentRequestPojo paymentRequest) {
         Map<String, Object> amount = new HashMap<>();
         amount.put("quantity", paymentRequest.getAmount().getQuantity());
-        amount.put("currency", paymentRequest.getAmount().currency);
+        amount.put("currency", paymentRequest.getAmount().getCurrency());
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("amount", amount);
@@ -537,7 +655,7 @@ public class Query {
     public static Map<String, Object> getCreatePaymentVariables(InstantPaymentRequestPojo paymentRequest) {
         Map<String, Object> amount = new HashMap<>();
         amount.put("quantity", paymentRequest.getAmount().getQuantity());
-        amount.put("currency", paymentRequest.getAmount().currency);
+        amount.put("currency", paymentRequest.getAmount().getCurrency());
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("amount", amount);

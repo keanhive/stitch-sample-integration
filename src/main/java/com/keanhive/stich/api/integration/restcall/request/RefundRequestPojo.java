@@ -9,24 +9,23 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @author KeanHive
- * @Date 14/10/2022
+ * @Date 18/10/2022
  */
-
 @Data
-public class BasePaymentRequestPojo {
+public class RefundRequestPojo {
+
+    @NotBlank(message = "Please provide a reasone")
+    private String reason;
+
+    @NotBlank(message = "Please provide a beneficiary reference")
+    private String beneficiaryReference;
+
+    @NotBlank(message = "Please provide a payment request ID")
+    private String paymentRequestId;
 
     @Valid
     @NotNull(message = "Amount cannot be null")
     public Amount amount;
-
-    @NotBlank(message = "Payer Reference cannot be blank")
-    public String payerReference;
-
-    @NotBlank(message = "Beneficiary Reference cannot be blank")
-    public String beneficiaryReference;
-
-    @NotBlank(message = "External Reference cannot be blank")
-    public String externalReference;
 
     @Data
     public static class Amount{
@@ -38,5 +37,3 @@ public class BasePaymentRequestPojo {
         private String currency;
     }
 }
-
-
