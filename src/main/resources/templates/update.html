@@ -3,8 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Link Pay Multifactor</title>
+    <style>
+        body{
+            background: #efefef;
+        }
+        pre {
+            background-color: ghostwhite;
+            border: 1px solid silver;
+            padding: 10px 20px;
+            margin: 20px;
+            border-radius: 4px;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
 </head>
-<body>
-   <p th:text="'Update: ' + ${update}" />
+<body onload="updateData()">
+    <pre>Information</pre>
+    <!--    <p th:text=${update}" id="jsonhidden" style="display:none"/>-->
+    <p th:text="${update}" id="jsonhidden" style="display:none"/>
+    <!--    <p th:text=${update}"/>-->
+    <pre id="json-data"></pre>
+
+<script>
+    function updateData() {
+        var content = document.getElementById("jsonhidden").textContent;
+
+        if (!isJson(content)) {
+            document.getElementById("json-data").innerHTML = content
+            return
+        }
+
+        var data = JSON.parse(content);
+        console.log(data);
+
+        document.getElementById("json-data").innerHTML = JSON.stringify(data, undefined, 2);
+    }
+
+    function isJson(obj) {
+        try {
+            var testIfJson = JSON.parse(obj);
+            return typeof testIfJson == "object";
+        } catch {
+            console.log("Data is not json object : " + obj)
+        }
+
+        return false
+    }
+</script>
 </body>
 </html>
