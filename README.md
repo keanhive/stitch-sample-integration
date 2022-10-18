@@ -11,9 +11,9 @@ Repository that integrates to stitch.money api using Java(Spring)
 
 ### Application Requirements:
 - Jdk 15 enabled environment
-- This application uses redis-cache as its in memory database. Run the following command to set it up
 - Use ng-rok to generate a host name that would be attached as the base url
 - Follow documentation and create you client id, then go to the retool app update using the below snippet
+- This application uses redis-cache as its in memory database. Run redis dependency command to set it up
 
 #### Run redis dependency
 ```
