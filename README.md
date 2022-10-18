@@ -6,21 +6,6 @@ Repository that integrates to stitch.money api using Java(Spring)
 {
     "clientId": "test-e0be6afd-d1c2-4e39-a912-06c2ade4c768",
     "redirectUris": [
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/instant-pay/conclude",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/user-token-redirect",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/web-hook",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/link-pay",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/link-pay/retrieve-token",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/link-pay/multifactor",
-        "https://65d3-102-67-0-154.eu.ngrok.io/keanhive/api/link-pay/get-subscription"
-    ]
-}
-
-
-
-{
-    "clientId": "test-e0be6afd-d1c2-4e39-a912-06c2ade4c768",
-    "redirectUris": [
       "https://82a7-105-112-18-170.eu.ngrok.io/keanhive/api/data/retrieve-token",
       "https://82a7-105-112-18-170.eu.ngrok.io/keanhive/api/instant-pay/conclude",
       "https://82a7-105-112-18-170.eu.ngrok.io/keanhive/api/web-hook",
@@ -42,6 +27,13 @@ Repository that integrates to stitch.money api using Java(Spring)
       "BankId":"nedbank",
       "BeneficiaryName":"FizzBuzz Co."
     }
+  ],
+    "alphaFlags": [
+    "refund",
+    "categorization",
+    "bankstatements",
+    "incomeestimation",
+    "paymentauthorizationrequest"
   ]
   }
   
