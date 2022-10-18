@@ -9,39 +9,42 @@ import java.util.Map;
 
 public class Query {
 
+
     public static String getRefundUpdatesQuery() {
-        return "subscription RefundUpdates($webhookUrl: URL!, $headers: [InputHeader!])  {\n" +
-                "  client(webhook: {url: $webhookUrl, headers: $headers}) {\n" +
-                "    refunds {\n" +
-                "      node {\n" +
-                "        status {\n" +
-                "          ... on RefundSubmitted {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "          }\n" +
-                "          ... on RefundCompleted {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            expectedSettlement\n" +
-                "          }\n" +
-                "          ... on RefundError {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            reason\n" +
-                "          }\n" +
-                "        }\n" +
-                "        reason\n" +
-                "        id\n" +
-                "        created\n" +
-                "        amount\n" +
-                "        beneficiaryReference\n" +
-                "      }\n" +
-                "      eventId\n" +
-                "      subscriptionId\n" +
-                "      time\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                subscription RefundUpdates($webhookUrl: URL!, $headers: [InputHeader!])  {
+                  client(webhook: {url: $webhookUrl, headers: $headers}) {
+                    refunds {
+                      node {
+                        status {
+                          ... on RefundSubmitted {
+                            __typename
+                            date
+                          }
+                          ... on RefundCompleted {
+                            __typename
+                            date
+                            expectedSettlement
+                          }
+                          ... on RefundError {
+                            __typename
+                            date
+                            reason
+                          }
+                        }
+                        reason
+                        id
+                        created
+                        amount
+                        beneficiaryReference
+                      }
+                      eventId
+                      subscriptionId
+                      time
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getRefundUpdatesVariables(String webhookUrl) {
@@ -51,64 +54,68 @@ public class Query {
     }
 
     public static String getGetRefundStatusQuery() {
-        return "query GetRefundStatus($refundId: ID!) {\n" +
-                "  node(id: $refundId) {\n" +
-                "    ... on Refund {\n" +
-                "      id\n" +
-                "      status {\n" +
-                "        ... on RefundPending {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "        }\n" +
-                "        ... on RefundSubmitted {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "        }\n" +
-                "        ... on RefundCompleted {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "          expectedSettlement\n" +
-                "        }\n" +
-                "        ... on RefundError {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "          reason\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  query GetRefundStatus($refundId: ID!) {
+                  node(id: $refundId) {
+                    ... on Refund {
+                      id
+                      status {
+                        ... on RefundPending {
+                          __typename
+                          date
+                        }
+                        ... on RefundSubmitted {
+                          __typename
+                          date
+                        }
+                        ... on RefundCompleted {
+                          __typename
+                          date
+                          expectedSettlement
+                        }
+                        ... on RefundError {
+                          __typename
+                          date
+                          reason
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
-    public static Map<String, Object> getGetRefundStatusVariables(String  refundId) {
+    public static Map<String, Object> getGetRefundStatusVariables(String refundId) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("refundId", refundId);
         return variables;
     }
 
     public static String getCreateRefundQuery() {
-        return "mutation CreateRefund(\n" +
-                "    $amount: MoneyInput!,\n" +
-                "    $reason: RefundReason!,\n" +
-                "    $nonce: String!,\n" +
-                "    $beneficiaryReference: String!,\n" +
-                "    $paymentRequestId: ID!\n" +
-                ") {\n" +
-                "  clientRefundInitiate(input: {\n" +
-                "      amount: $amount,\n" +
-                "      reason: $reason,\n" +
-                "      nonce: $nonce,\n" +
-                "      beneficiaryReference: $beneficiaryReference,\n" +
-                "      paymentRequestId: $paymentRequestId\n" +
-                "    }) {\n" +
-                "    refund {\n" +
-                "      id\n" +
-                "      paymentInitiationRequest {\n" +
-                "        id\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                    mutation CreateRefund(
+                    $amount: MoneyInput!,
+                    $reason: RefundReason!,
+                    $nonce: String!,
+                    $beneficiaryReference: String!,
+                    $paymentRequestId: ID!
+                ) {
+                  clientRefundInitiate(input: {
+                      amount: $amount,
+                      reason: $reason,
+                      nonce: $nonce,
+                      beneficiaryReference: $beneficiaryReference,
+                      paymentRequestId: $paymentRequestId
+                    }) {
+                    refund {
+                      id
+                      paymentInitiationRequest {
+                        id
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getCreateRefundVariables(RefundRequestPojo paymentRequest, String nonce) {
@@ -127,50 +134,55 @@ public class Query {
     }
 
     public static String getDebitOrderPaymentsByBankAccountQuery() {
-        return "query DebitOrderPaymentsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {\n" +
-                "  node(id: $accountId) {\n" +
-                "    ... on BankAccount {\n" +
-                "      debitOrderPayments(first: $first, after: $after) {\n" +
-                "        pageInfo {\n" +
-                "          hasNextPage\n" +
-                "          endCursor\n" +
-                "        }\n" +
-                "        edges {\n" +
-                "          node {\n" +
-                "            id\n" +
-                "            amount\n" +
-                "            reference\n" +
-                "            date\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  query DebitOrderPaymentsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {
+                  node(id: $accountId) {
+                    ... on BankAccount {
+                      debitOrderPayments(first: $first, after: $after) {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                        }
+                        edges {
+                          node {
+                            id
+                            amount
+                            reference
+                            date
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
+
     public static String getTransactionsByBankAccountQuery() {
-        return "query TransactionsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {\n" +
-                "  node(id: $accountId) {\n" +
-                "    ... on BankAccount {\n" +
-                "      transactions(first: $first, after: $after) {\n" +
-                "        pageInfo {\n" +
-                "          hasNextPage\n" +
-                "          endCursor\n" +
-                "        }\n" +
-                "        edges {\n" +
-                "          node {\n" +
-                "            id\n" +
-                "            amount\n" +
-                "            reference\n" +
-                "            description\n" +
-                "            date\n" +
-                "            runningBalance\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  query TransactionsByBankAccount($accountId: ID!, $first: UInt, $after: Cursor) {
+                  node(id: $accountId) {
+                    ... on BankAccount {
+                      transactions(first: $first, after: $after) {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                        }
+                        edges {
+                          node {
+                            id
+                            amount
+                            reference
+                            description
+                            date
+                            runningBalance
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getTransactionsByBankAccountVariables(String accountId) {
@@ -179,138 +191,149 @@ public class Query {
         variables.put("first", 10);
         return variables;
     }
+
     public static String getGetAccountBalanceQuery() {
-        return "query GetAccountBalances {\n" +
-                "  user {\n" +
-                "    bankAccounts {\n" +
-                "      currentBalance\n" +
-                "      availableBalance\n" +
-                "      id\n" +
-                "      name\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
+        return """
+                  query GetAccountBalances {
+                  user {
+                    bankAccounts {
+                      currentBalance
+                      availableBalance
+                      id
+                      name
+                    }
+                  }
+                }
+                """;
     }
+
     public static String getGetAccountHoldersQuery() {
-        return "query GetAccountHolders {\n" +
-                "  user {\n" +
-                "    bankAccounts {\n" +
-                "      accountHolder {\n" +
-                "        __typename\n" +
-                "        ... on Individual {\n" +
-                "          gender\n" +
-                "          fullName\n" +
-                "          email\n" +
-                "          familyName\n" +
-                "          givenName\n" +
-                "          identifyingDocument {\n" +
-                "            ... on IdentityDocument {\n" +
-                "              __typename\n" +
-                "              country\n" +
-                "              number\n" +
-                "            }\n" +
-                "            ... on Passport {\n" +
-                "              __typename\n" +
-                "              country\n" +
-                "              number\n" +
-                "            }\n" +
-                "          }\n" +
-                "          middleName\n" +
-                "          nickname\n" +
-                "          homeAddress {\n" +
-                "            country\n" +
-                "            formatted\n" +
-                "            locality\n" +
-                "            postalCode\n" +
-                "            region\n" +
-                "            streetAddress\n" +
-                "          }\n" +
-                "          contact {\n" +
-                "            name\n" +
-                "            phoneNumber\n" +
-                "          }\n" +
-                "        }\n" +
-                "        ... on Business {\n" +
-                "          registrationNumber\n" +
-                "          name\n" +
-                "          accountContact {\n" +
-                "            name\n" +
-                "            phoneNumber\n" +
-                "          }\n" +
-                "          businessAddress {\n" +
-                "            country\n" +
-                "            formatted\n" +
-                "            locality\n" +
-                "            postalCode\n" +
-                "            streetAddress\n" +
-                "            region\n" +
-                "          }\n" +
-                "          email\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
+        return """
+                  query GetAccountHolders {
+                  user {
+                    bankAccounts {
+                      accountHolder {
+                        __typename
+                        ... on Individual {
+                          gender
+                          fullName
+                          email
+                          familyName
+                          givenName
+                          identifyingDocument {
+                            ... on IdentityDocument {
+                              __typename
+                              country
+                              number
+                            }
+                            ... on Passport {
+                              __typename
+                              country
+                              number
+                            }
+                          }
+                          middleName
+                          nickname
+                          homeAddress {
+                            country
+                            formatted
+                            locality
+                            postalCode
+                            region
+                            streetAddress
+                          }
+                          contact {
+                            name
+                            phoneNumber
+                          }
+                        }
+                        ... on Business {
+                          registrationNumber
+                          name
+                          accountContact {
+                            name
+                            phoneNumber
+                          }
+                          businessAddress {
+                            country
+                            formatted
+                            locality
+                            postalCode
+                            streetAddress
+                            region
+                          }
+                          email
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
+
     public static String getGetAccountsQuery() {
-        return "query GetAccounts {\n" +
-                "  user {\n" +
-                "    bankAccounts {\n" +
-                "      accountNumber\n" +
-                "      accountType\n" +
-                "      bankId\n" +
-                "      branchCode\n" +
-                "      id\n" +
-                "      name\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
+        return """
+                  query GetAccounts {
+                  user {
+                    bankAccounts {
+                      accountNumber
+                      accountType
+                      bankId
+                      branchCode
+                      id
+                      name
+                    }
+                  }
+                }
+                """;
     }
 
     public static String getLinkPayUpdatesQuery() {
-        return "subscription LinkPayUpdates($webhookUrl: URL!, $headers: [InputHeader!]) {\n" +
-                "  client(webhook: {url: $webhookUrl, headers: $headers}) {\n" +
-                "    paymentInitiations {\n" +
-                "      eventId\n" +
-                "      subscriptionId\n" +
-                "      time\n" +
-                "      node {\n" +
-                "        id\n" +
-                "        externalReference\n" +
-                "        date\n" +
-                "        status {\n" +
-                "          ... on PaymentInitiationCompleted {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            payer {\n" +
-                "              ... on PaymentInitiationBankAccountPayer {\n" +
-                "                __typename\n" +
-                "                accountName\n" +
-                "                accountType\n" +
-                "                accountNumber\n" +
-                "                bankId\n" +
-                "              }\n" +
-                "            }\n" +
-                "          }\n" +
-                "          ... on PaymentInitiationFailed {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            reason\n" +
-                "          }\n" +
-                "          ... on PaymentInitiationCancelled {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            reason\n" +
-                "          }\n" +
-                "          ... on PaymentInitiationExpired {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  subscription LinkPayUpdates($webhookUrl: URL!, $headers: [InputHeader!]) {
+                  client(webhook: {url: $webhookUrl, headers: $headers}) {
+                    paymentInitiations {
+                      eventId
+                      subscriptionId
+                      time
+                      node {
+                        id
+                        externalReference
+                        date
+                        status {
+                          ... on PaymentInitiationCompleted {
+                            __typename
+                            date
+                            payer {
+                              ... on PaymentInitiationBankAccountPayer {
+                                __typename
+                                accountName
+                                accountType
+                                accountNumber
+                                bankId
+                              }
+                            }
+                          }
+                          ... on PaymentInitiationFailed {
+                            __typename
+                            date
+                            reason
+                          }
+                          ... on PaymentInitiationCancelled {
+                            __typename
+                            date
+                            reason
+                          }
+                          ... on PaymentInitiationExpired {
+                            __typename
+                            date
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getLinkPayUpdatesQueryVariables(String webhookUrl) {
@@ -320,123 +343,127 @@ public class Query {
     }
 
     public static String getRetrievePaymentInitiationQuery() {
-        return "query RetrieveAllPaymentInitiations {\n" +
-                "  client {\n" +
-                "    paymentInitiations {\n" +
-                "      edges {\n" +
-                "        node {\n" +
-                "          id\n" +
-                "          amount\n" +
-                "          beneficiaryReference\n" +
-                "          payerReference\n" +
-                "          externalReference\n" +
-                "          date\n" +
-                "          beneficiary {\n" +
-                "            ... on BankBeneficiary {\n" +
-                "              __typename\n" +
-                "              bankAccountNumber\n" +
-                "              bankId\n" +
-                "              name\n" +
-                "            }\n" +
-                "          }\n" +
-                "          status {\n" +
-                "            ... on PaymentInitiationCompleted {\n" +
-                "              __typename\n" +
-                "              date\n" +
-                "              payer {\n" +
-                "                ... on PaymentInitiationBankAccountPayer {\n" +
-                "                  __typename\n" +
-                "                  accountName\n" +
-                "                  accountNumber\n" +
-                "                  accountType\n" +
-                "                  bankId\n" +
-                "                }\n" +
-                "              }\n" +
-                "            }\n" +
-                "            ... on PaymentInitiationPending {\n" +
-                "              __typename\n" +
-                "              id\n" +
-                "              url\n" +
-                "            }\n" +
-                "            ... on PaymentInitiationFailed {\n" +
-                "              __typename\n" +
-                "              date\n" +
-                "              reason\n" +
-                "            }\n" +
-                "            ... on PaymentInitiationExpired {\n" +
-                "              __typename\n" +
-                "              date\n" +
-                "            }\n" +
-                "            ... on PaymentInitiationCancelled {\n" +
-                "              __typename\n" +
-                "              id\n" +
-                "              date\n" +
-                "              reason\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
+        return """
+                  query RetrieveAllPaymentInitiations {
+                  client {
+                    paymentInitiations {
+                      edges {
+                        node {
+                          id
+                          amount
+                          beneficiaryReference
+                          payerReference
+                          externalReference
+                          date
+                          beneficiary {
+                            ... on BankBeneficiary {
+                              __typename
+                              bankAccountNumber
+                              bankId
+                              name
+                            }
+                          }
+                          status {
+                            ... on PaymentInitiationCompleted {
+                              __typename
+                              date
+                              payer {
+                                ... on PaymentInitiationBankAccountPayer {
+                                  __typename
+                                  accountName
+                                  accountNumber
+                                  accountType
+                                  bankId
+                                }
+                              }
+                            }
+                            ... on PaymentInitiationPending {
+                              __typename
+                              id
+                              url
+                            }
+                            ... on PaymentInitiationFailed {
+                              __typename
+                              date
+                              reason
+                            }
+                            ... on PaymentInitiationExpired {
+                              __typename
+                              date
+                            }
+                            ... on PaymentInitiationCancelled {
+                              __typename
+                              id
+                              date
+                              reason
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static String getRetrievePaymentInitiationByIdQuery() {
-        return "query RetrievePaymentInitiationById($paymentInitiationId: ID!) {\n" +
-                "  node(id: $paymentInitiationId) {\n" +
-                "    ... on PaymentInitiation {\n" +
-                "      id\n" +
-                "      amount\n" +
-                "      beneficiary {\n" +
-                "        ... on BankBeneficiary {\n" +
-                "          __typename\n" +
-                "          bankAccountNumber\n" +
-                "          bankId\n" +
-                "          name\n" +
-                "        }\n" +
-                "      }\n" +
-                "      beneficiaryReference\n" +
-                "      date\n" +
-                "      externalReference\n" +
-                "      payerReference\n" +
-                "      status {\n" +
-                "        ... on PaymentInitiationCompleted {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "          payer {\n" +
-                "            ... on PaymentInitiationBankAccountPayer {\n" +
-                "              __typename\n" +
-                "              accountName\n" +
-                "              accountNumber\n" +
-                "              accountType\n" +
-                "              bankId\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "        ... on PaymentInitiationPending {\n" +
-                "          __typename\n" +
-                "          id\n" +
-                "          url\n" +
-                "        }\n" +
-                "        ... on PaymentInitiationFailed {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "          reason\n" +
-                "        }\n" +
-                "        ... on PaymentInitiationExpired {\n" +
-                "          __typename\n" +
-                "          date\n" +
-                "        }\n" +
-                "        ... on PaymentInitiationCancelled {\n" +
-                "          __typename\n" +
-                "          id\n" +
-                "          date\n" +
-                "          reason\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  query RetrievePaymentInitiationById($paymentInitiationId: ID!) {
+                  node(id: $paymentInitiationId) {
+                    ... on PaymentInitiation {
+                      id
+                      amount
+                      beneficiary {
+                        ... on BankBeneficiary {
+                          __typename
+                          bankAccountNumber
+                          bankId
+                          name
+                        }
+                      }
+                      beneficiaryReference
+                      date
+                      externalReference
+                      payerReference
+                      status {
+                        ... on PaymentInitiationCompleted {
+                          __typename
+                          date
+                          payer {
+                            ... on PaymentInitiationBankAccountPayer {
+                              __typename
+                              accountName
+                              accountNumber
+                              accountType
+                              bankId
+                            }
+                          }
+                        }
+                        ... on PaymentInitiationPending {
+                          __typename
+                          id
+                          url
+                        }
+                        ... on PaymentInitiationFailed {
+                          __typename
+                          date
+                          reason
+                        }
+                        ... on PaymentInitiationExpired {
+                          __typename
+                          date
+                        }
+                        ... on PaymentInitiationCancelled {
+                          __typename
+                          id
+                          date
+                          reason
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
 
@@ -447,13 +474,15 @@ public class Query {
     }
 
     public static String getCancelPaymentQuery() {
-        return "mutation CancelPaymentInitiation($paymentRequestId: ID!, $reason: String!)\n" +
-                "{\n" +
-                "  clientPaymentInitiationCancel(input: {requestId: $paymentRequestId, reason: $reason}) {\n" +
-                "    id\n" +
-                "    __typename\n" +
-                "  }\n" +
-                "}";
+        return """
+                mutation CancelPaymentInitiation($paymentRequestId: ID!, $reason: String!)
+                {
+                  clientPaymentInitiationCancel(input: {requestId: $paymentRequestId, reason: $reason}) {
+                    id
+                    __typename
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getCancelPaymentQueryVariables(String paymentRequestId, String reason) {
@@ -463,27 +492,29 @@ public class Query {
 
         return variables;
     }
+
     public static String getUserInitiatePaymentQuery() {
-        return "mutation UserInitiatePayment(\n" +
-                "    $amount: MoneyInput!,\n" +
-                "    $payerReference: String!,\n" +
-                "    $externalReference: String) {  \n" +
-                "  userInitiatePayment(input: {\n" +
-                "      amount: $amount,\n" +
-                "      payerReference: $payerReference,\n" +
-                "      externalReference: $externalReference\n" +
-                "    }) {\n" +
-                "    paymentInitiation {\n" +
-                "      amount\n" +
-                "      date\n" +
-                "      id\n" +
-                "      status {\n" +
-                "        __typename\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}"
-                ;
+        return """
+                    mutation UserInitiatePayment(
+                    $amount: MoneyInput!,
+                    $payerReference: String!,
+                    $externalReference: String) {  
+                  userInitiatePayment(input: {
+                      amount: $amount,
+                      payerReference: $payerReference,
+                      externalReference: $externalReference
+                    }) {
+                    paymentInitiation {
+                      amount
+                      date
+                      id
+                      status {
+                        __typename
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> getUserInitiatePaymentVariables(LinkPaymentRequestPojo paymentRequest) {
@@ -501,71 +532,74 @@ public class Query {
     }
 
     public static String getLinkedAccountAndIdentityInfoQuery() {
-        return "query GetLinkedAccountAndIdentityInfo {  \n" +
-                "  user {\n" +
-                "    paymentAuthorization {\n" +
-                "      bankAccount {\n" +
-                "        id\n" +
-                "        name\n" +
-                "        accountNumber\n" +
-                "        accountType\n" +
-                "        bankId\n" +
-                "        accountHolder {\n" +
-                "          __typename\n" +
-                "          ... on Individual {\n" +
-                "            fullName\n" +
-                "            identifyingDocument {\n" +
-                "              ... on IdentityDocument {\n" +
-                "                __typename\n" +
-                "                country\n" +
-                "                number\n" +
-                "              }\n" +
-                "              ... on Passport {\n" +
-                "                __typename\n" +
-                "                country\n" +
-                "                number\n" +
-                "              }\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}"
-                ;
+        return """
+                  query GetLinkedAccountAndIdentityInfo {  
+                  user {
+                    paymentAuthorization {
+                      bankAccount {
+                        id
+                        name
+                        accountNumber
+                        accountType
+                        bankId
+                        accountHolder {
+                          __typename
+                          ... on Individual {
+                            fullName
+                            identifyingDocument {
+                              ... on IdentityDocument {
+                                __typename
+                                country
+                                number
+                              }
+                              ... on Passport {
+                                __typename
+                                country
+                                number
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
     }
 
     public static String createAccountLinkingRequestUpdatesQuery() {
-        return "mutation CreateAccountLinkingRequest(" +
-                "$name: String!," +
-                "$bankId: BankBeneficiaryBankId!," +
-                "$accountNumber: String!," +
-                "$accountType: AccountType!," +
-                "$beneficiaryType: BankBeneficiaryType!," +
-                "$reference: String!," +
-                "$payerEmail: EmailAddress!," +
-                "$payerName: String!," +
-                "$payerReference: String!," +
-                "$payerPhoneNumber: String!) {" +
-                "  clientPaymentAuthorizationRequestCreate(input: {" +
-                "    beneficiary: {" +
-                "      bankAccount: {" +
-                "        name: $name, " +
-                "        bankId: $bankId, " +
-                "        accountNumber: $accountNumber, " +
-                "        accountType: $accountType, " +
-                "        beneficiaryType: $beneficiaryType, " +
-                "        reference: $reference" +
-                "      }" +
-                "    }, payer: {        " +
-                "      email: $payerEmail,       " +
-                "      name: $payerName, " +
-                "      reference: $payerReference," +
-                "      phoneNumber: $payerPhoneNumber" +
-                "  }}) {" +
-                "    authorizationRequestUrl" +
-                "  }" +
-                "}";
+        return """
+                mutation CreateAccountLinkingRequest(
+                $name: String!,
+                $bankId: BankBeneficiaryBankId!, 
+                $accountNumber: String!, 
+                $accountType: AccountType!, 
+                $beneficiaryType: BankBeneficiaryType!, 
+                $reference: String!, 
+                $payerEmail: EmailAddress!, 
+                $payerName: String!, 
+                $payerReference: String!, 
+                $payerPhoneNumber: String!) { 
+                  clientPaymentAuthorizationRequestCreate(input: { 
+                    beneficiary: { 
+                      bankAccount: { 
+                        name: $name,  
+                        bankId: $bankId,  
+                        accountNumber: $accountNumber,  
+                        accountType: $accountType,  
+                        beneficiaryType: $beneficiaryType,  
+                        reference: $reference 
+                      } 
+                    }, payer: {         
+                      email: $payerEmail,        
+                      name: $payerName,  
+                      reference: $payerReference, 
+                      phoneNumber: $payerPhoneNumber 
+                  }}) { 
+                    authorizationRequestUrl 
+                  } 
+                }
+                """;
     }
 
     public static Map<String, Object> createAccountLinkingRequestUpdatesQueryVariables(LinkPaymentRequestPojo paymentRequest) {
@@ -583,34 +617,37 @@ public class Query {
 
         return variables;
     }
+
     public static String instantPayUpdatesQuery() {
-        return  "subscription InstantPayUpdates($webhookUrl: URL!, $headers: [InputHeader!]) {\n" +
-                "  client(webhook: {url: $webhookUrl, headers: $headers}) {\n" +
-                "    paymentInitiationRequests {\n" +
-                "      node {\n" +
-                "        id\n" +
-                "        externalReference\n" +
-                "        state {\n" +
-                "          __typename\n" +
-                "          ... on PaymentInitiationRequestCompleted {\n" +
-                "            date\n" +
-                "          }\n" +
-                "          ... on PaymentInitiationRequestCancelled {\n" +
-                "            __typename\n" +
-                "            date\n" +
-                "            reason\n" +
-                "          }\n" +
-                "          ... on PaymentInitiationRequestExpired {\n" +
-                "            date\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "      eventId\n" +
-                "      subscriptionId\n" +
-                "      time\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                  subscription InstantPayUpdates($webhookUrl: URL!, $headers: [InputHeader!]) {
+                  client(webhook: {url: $webhookUrl, headers: $headers}) {
+                    paymentInitiationRequests {
+                      node {
+                        id
+                        externalReference
+                        state {
+                          __typename
+                          ... on PaymentInitiationRequestCompleted {
+                            date
+                          }
+                          ... on PaymentInitiationRequestCancelled {
+                            __typename
+                            date
+                            reason
+                          }
+                          ... on PaymentInitiationRequestExpired {
+                            date
+                          }
+                        }
+                      }
+                      eventId
+                      subscriptionId
+                      time
+                    }
+                  }
+                }
+                """;
     }
 
     public static Map<String, Object> instantPayUpdatesQueryVariables(String webhookUrl) {
@@ -621,33 +658,35 @@ public class Query {
     }
 
     public static String createPaymentRequestQuery() {
-        return  "mutation CreatePaymentRequest(\n" +
-                "    $amount: MoneyInput!,\n" +
-                "    $payerReference: String!,\n" +
-                "    $beneficiaryReference: String!,\n" +
-                "    $externalReference: String,\n" +
-                "    $beneficiaryName: String!,\n" +
-                "    $beneficiaryBankId: BankBeneficiaryBankId!,\n" +
-                "    $beneficiaryAccountNumber: String!) {\n" +
-                "  clientPaymentInitiationRequestCreate(input: {\n" +
-                "      amount: $amount,\n" +
-                "      payerReference: $payerReference,\n" +
-                "      beneficiaryReference: $beneficiaryReference,\n" +
-                "      externalReference: $externalReference,\n" +
-                "      beneficiary: {\n" +
-                "          bankAccount: {\n" +
-                "              name: $beneficiaryName,\n" +
-                "              bankId: $beneficiaryBankId,\n" +
-                "              accountNumber: $beneficiaryAccountNumber\n" +
-                "          }\n" +
-                "      }\n" +
-                "    }) {\n" +
-                "    paymentInitiationRequest {\n" +
-                "      id\n" +
-                "      url\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        return """
+                    mutation CreatePaymentRequest(
+                    $amount: MoneyInput!,
+                    $payerReference: String!,
+                    $beneficiaryReference: String!,
+                    $externalReference: String,
+                    $beneficiaryName: String!,
+                    $beneficiaryBankId: BankBeneficiaryBankId!,
+                    $beneficiaryAccountNumber: String!) {
+                  clientPaymentInitiationRequestCreate(input: {
+                      amount: $amount,
+                      payerReference: $payerReference,
+                      beneficiaryReference: $beneficiaryReference,
+                      externalReference: $externalReference,
+                      beneficiary: {
+                          bankAccount: {
+                              name: $beneficiaryName,
+                              bankId: $beneficiaryBankId,
+                              accountNumber: $beneficiaryAccountNumber
+                          }
+                      }
+                    }) {
+                    paymentInitiationRequest {
+                      id
+                      url
+                    }
+                  }
+                }
+                """;
 
     }
 
