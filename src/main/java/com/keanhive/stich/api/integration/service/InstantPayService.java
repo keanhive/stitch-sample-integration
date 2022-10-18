@@ -15,6 +15,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
@@ -43,7 +45,9 @@ public class InstantPayService {
 
     public void instantPayConclusion(Map<String, String> qparams, ModelAndView modelAndView) {
         log.debug("instant pay details {}", qparams);
-
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy HH:mm:ss a");
+        modelAndView.addObject("name", "Akinkunmi");
+        modelAndView.addObject("date", dateTimeFormatter.format(LocalDateTime.now()));
         modelAndView.addObject("id", qparams.get("id"));
         modelAndView.addObject("status", qparams.get("status"));
         modelAndView.addObject("externalReference", qparams.get("externalReference"));

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keanhive.stich.api.integration.cache.CacheService;
+import com.keanhive.stich.api.integration.enums.ProcessTypeEnum;
 import com.keanhive.stich.api.integration.graphql.GraphqlRequestBody;
 import com.keanhive.stich.api.integration.graphql.Query;
 import com.keanhive.stich.api.integration.graphql.response.ClientPaymentAuthorizationDto;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +74,9 @@ public class LinkPayService {
     public void linkPayMultifactor(Map<String, String> qparams, ModelAndView model) {
         log.debug("linkPayMultifactor qparams {}", qparams);
 
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy HH:mm:ss a");
+        model.addObject("name", "Akinkunmi");
+        model.addObject("date", dateTimeFormatter.format(LocalDateTime.now()));
         model.addObject("id", qparams.get("id"));
         model.addObject("externalReference", qparams.get("externalReference"));
         model.addObject("status", qparams.get("status"));
@@ -89,9 +95,13 @@ public class LinkPayService {
         ClientTokenResponse clientTokenResponse = tokenGenerationService.handleClientTokenSession();
         log.debug("clientTokednResponse: {} ======= : {}", clientTokenResponse, clientTokenResponse.getAccessToken());
         ClientPaymentAuthorizationDto clientPaymentAuthorizationDto = initiateCreateAccountLinkingRequest(clientTokenResponse, linkPaymentRequestPojo);
+
+        UserSessionInfo userSessionInfo = new UserSessionInfo();
+        userSessionInfo.setLinkPaymentRequest(linkPaymentRequestPojo);
+        userSessionInfo.setProcessTypeEnum(ProcessTypeEnum.LINK_PAY);
         tokenGenerationService
                 .handleUserTokenStep1(clientPaymentAuthorizationDto.getData().getClientPaymentAuthorizationRequestCreate().getAuthorizationRequestUrl()
-                        , linkPaymentRequestPojo);
+                        , appProperties.getLinkPayRedirectUrl(), userSessionInfo);
     }
 
     /**
@@ -174,6 +184,9 @@ public class LinkPayService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Unable to retrieve payment initiation response, please try again", e);
         }
+
+        String launchUrl = String.format("%s?update=%s&status=success", appProperties.getLinkPayUpdateRedirectUrl(), linkedAccountAndIdentityInfoDtoResponse);
+        util.launchUrlInBrowser(launchUrl);
     }
 
     public void handleGetLinkedAccountAndIdentityInfo(UserSessionInfo userSessionInfo) {

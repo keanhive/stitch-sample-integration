@@ -36,7 +36,7 @@ public class AppProperties {
     private String userTokenScope;
     private String responseType;
     private String codeChallengeMethod;
-    private String userTokenRedirectUrl;
+    private String userTokenDataRedirectUrl;
 
 //  usertoken session3
     private String userTokenConnectUrl;

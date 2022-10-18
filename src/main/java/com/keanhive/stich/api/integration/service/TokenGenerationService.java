@@ -5,15 +5,15 @@ import akka.actor.ActorSystem;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.keanhive.stich.api.integration.akka.LinkPayActor;
 import com.keanhive.stich.api.integration.akka.SpringExtension;
+import com.keanhive.stich.api.integration.akka.UserSessionActor;
 import com.keanhive.stich.api.integration.cache.CacheService;
-import com.keanhive.stich.api.integration.pojos.UserSessionInfo;
+import com.keanhive.stich.api.integration.enums.ProcessTypeEnum;
 import com.keanhive.stich.api.integration.pojos.ClientTokenResponse;
+import com.keanhive.stich.api.integration.pojos.UserSessionInfo;
 import com.keanhive.stich.api.integration.pojos.UserTokenResponse;
 import com.keanhive.stich.api.integration.restcall.RestServiceResponse;
 import com.keanhive.stich.api.integration.restcall.SpringClientParams;
-import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import com.keanhive.stich.api.integration.utils.AppProperties;
 import com.keanhive.stich.api.integration.utils.Constants;
 import com.keanhive.stich.api.integration.utils.Util;
@@ -92,7 +92,7 @@ public class TokenGenerationService {
 
         try {
             clientTokenResponseR = util.post(params, restTemplate);
-//            log.debug("clientTokenResponse: {}", clientTokenResponse);
+            log.debug("clientTokenResponse: {}", clientTokenResponse);
             clientTokenResponse = clientTokenResponseR.getBody();
             cacheClientToken(clientTokenResponse);
             return clientTokenResponse;
@@ -109,17 +109,14 @@ public class TokenGenerationService {
      * to be triggered by stitch api when complete.
      *
      * @param authorizationUrl
-     * @param linkPaymentRequestPojo
      */
-    public void handleUserTokenStep1(String authorizationUrl, LinkPaymentRequestPojo linkPaymentRequestPojo) {
+    public void handleUserTokenStep1(String authorizationUrl, String redirectUrl, UserSessionInfo userSessionInfo) {
         Map<String, String> verifierChallengePair = util.generateVerifierChallengePair();
 
-        UserSessionInfo userSessionInfo = new UserSessionInfo();
         userSessionInfo.setChallenge(verifierChallengePair.get(Constants.CHALLENGE));
         userSessionInfo.setVerifier(verifierChallengePair.get(Constants.VERIFIER));
         userSessionInfo.setState(util.generateRandomStateOrNonce());
         userSessionInfo.setNonce(util.generateRandomStateOrNonce());
-        userSessionInfo.setLinkPaymentRequest(linkPaymentRequestPojo);
 
         StringBuilder generatedUrl = new StringBuilder();
         generatedUrl
@@ -128,16 +125,14 @@ public class TokenGenerationService {
                 .append(Constants.CLIENT_ID).append("=").append(appProperties.getClientId()).append("&")
                 .append(Constants.SCOPE).append("=").append(appProperties.getUserTokenScope()).append("&")
                 .append(Constants.RESPONSE_TYPE).append("=").append(appProperties.getResponseType()).append("&")
-                .append(Constants.REDIRECT_URI).append("=").append(appProperties.getLinkPayRedirectUrl()).append("&")
+                .append(Constants.REDIRECT_URI).append("=").append(redirectUrl).append("&")
                 .append(Constants.CHALLENGE).append("=").append(userSessionInfo.getChallenge()).append("&")
                 .append(Constants.CODE_CHALLENGE_METHOD).append("=").append(appProperties.getCodeChallengeMethod()).append("&")
                 .append(Constants.STATE).append("=").append(userSessionInfo.getState()).append("&")
                 .append(Constants.NONCE).append("=").append(userSessionInfo.getNonce())
         ;
 
-
         cacheUserSessionInfo(userSessionInfo);
-        cacheService.setItem(linkPaymentRequestPojo.getUniqueId(), userSessionInfo.getState(), appProperties.getCacheTime());
         util.launchUrlInBrowser(generatedUrl.toString());
     }
 
@@ -154,7 +149,7 @@ public class TokenGenerationService {
         body.add(Constants.GRANT_TYPE, appProperties.getUserTokenGrantType());
         body.add(Constants.CLIENT_ID, appProperties.getClientId());
         body.add(Constants.CODE, userSessionInfo.getCode());
-        body.add(Constants.REDIRECT_URI, appProperties.getLinkPayRedirectUrl());
+        body.add(Constants.REDIRECT_URI, getRedirectUrl(userSessionInfo));
         body.add("code_verifier", userSessionInfo.getVerifier());
         body.add(Constants.CLIENT_SECRET, appProperties.getClientSecret());
 
@@ -177,7 +172,17 @@ public class TokenGenerationService {
         return null;
     }
 
+    private String getRedirectUrl(UserSessionInfo userSessionInfo) {
+        if (userSessionInfo.getProcessTypeEnum() == null || userSessionInfo.getProcessTypeEnum() == ProcessTypeEnum.LINK_PAY) {
+            return appProperties.getLinkPayRedirectUrl();
+        }
+
+        //todo add switch case for other usecases at a later time
+        return appProperties.getUserTokenDataRedirectUrl();
+    }
+
     public void retrieveToken(Map<String, String> queryParams) {
+        log.debug("Retrieve token {}", queryParams);
         String state = queryParams.get(Constants.STATE);
         if (StringUtils.isBlank(state)) {
             throw new RuntimeException("Unable to retrieve transaction state. Please try again");
@@ -221,8 +226,9 @@ public class TokenGenerationService {
     }
 
     /**
-     * triggers {@link LinkPayActor} to continue with the user token flow upon successful
+     * triggers {@link UserSessionActor} to continue with the user token flow upon successful
      * creation/verification
+     *
      * @param userSessionInfo
      */
     private void triggerUserTokenActor(UserSessionInfo userSessionInfo) {
@@ -230,7 +236,7 @@ public class TokenGenerationService {
                                 .actorOf(SpringExtension.SPRING_EXTENSION_PROVIDER
                                         .get(system)
                                         .props(Introspector
-                                                .decapitalize(LinkPayActor.class.getSimpleName())), String.format("userToken_%s", userSessionInfo.getState()));
+                                                .decapitalize(UserSessionActor.class.getSimpleName())), String.format("userToken_%s", userSessionInfo.getState()));
         userToken.tell(userSessionInfo, ActorRef.noSender());
     }
 

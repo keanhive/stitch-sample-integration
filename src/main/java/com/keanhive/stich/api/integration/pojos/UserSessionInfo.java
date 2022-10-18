@@ -1,5 +1,7 @@
 package com.keanhive.stich.api.integration.pojos;
 
+import com.keanhive.stich.api.integration.enums.ProcessTypeEnum;
+import com.keanhive.stich.api.integration.restcall.request.DataRequestPojo;
 import com.keanhive.stich.api.integration.restcall.request.LinkPaymentRequestPojo;
 import lombok.Data;
 
@@ -18,4 +20,6 @@ public class UserSessionInfo {
     private String refreshToken;
     private String scope;
     private LinkPaymentRequestPojo linkPaymentRequest;
+    private DataRequestPojo dataRequest;
+    private ProcessTypeEnum processTypeEnum;
 }

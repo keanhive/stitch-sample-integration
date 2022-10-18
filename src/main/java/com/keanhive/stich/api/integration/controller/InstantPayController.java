@@ -26,7 +26,7 @@ public class InstantPayController {
     @GetMapping("/conclude")
     public ModelAndView instantPay(@RequestParam(required = false) Map<String, String> qparams) {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("instantpay.html");
+        modelAndView.setViewName("result.html");
 
         instantPayService.instantPayConclusion(qparams, modelAndView);
 
